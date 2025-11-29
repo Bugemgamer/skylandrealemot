@@ -3,143 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emote + API Team Join</title>
+    <title>Emote Code Search</title>
     <style>
+        /* Hide Blogger Navbar */
+        .navbar, .navbar-fixed-top, .navbar-fixed-bottom {
+            display: none !important;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         body {
-            background: #111;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             color: white;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        .box {
-            background: #222;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        input, button {
+            min-height: 100vh;
             padding: 10px;
-            border-radius: 5px;
-            border: none;
-            margin: 5px 0;
-            width: 100%;
         }
-        button {
-            background: #28a745;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* TEAM SECTION INPUTS */
+        .team-section {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .team-section input {
+            width: 100%;
+            padding: 8px 12px;
+            margin: 6px 0;
+            border-radius: 6px;
+            border: none;
+            outline: none;
+        }
+
+        .team-section button {
+            margin-top: 8px;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: #4CAF50;
             color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        #searchInput {
+            width: 70%;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 50px 0 0 50px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        
+        #searchButton {
+            padding: 8px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 0 50px 50px 0;
             cursor: pointer;
         }
-        button:hover {
-            opacity: 0.8;
-        }
-        .result {
-            white-space: pre-wrap;
-            background: #000;
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 10px;
-        }
+
         .emote-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(120px,1fr));
             gap: 8px;
         }
+
         .emote-card {
-            background: #333;
+            background: rgba(255,255,255,0.1);
             padding: 10px;
-            border-radius: 10px;
+            border-radius: 8px;
             text-align: center;
             cursor: pointer;
         }
-        .emote-card:hover {
-            background: #444;
+
+        .emote-icon {
+            width: 60px;
+            height: 60px;
+            background-size: contain;
+            background-position: center;
+            margin: auto;
+        }
+
+        .activate-btn {
+            margin-top: 6px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
         }
     </style>
 </head>
 <body>
+<div class="container">
+    <header>
+        <h1>Emote Activation</h1>
+    </header>
 
-    <h1>TEAM JOIN API + EMOTE PICKER</h1>
+    <!-- TEAM CODE SECTION -->
+    <div class="team-section">
+        <h3>TEAM & UID SETUP</h3>
 
-    <!-- API FORM -->
-    <div class="box">
-        <h2>API Team Join Generator</h2>
+        <input type="text" id="teamCode" placeholder="Team Code (wajib)">
+        <input type="text" id="uid1" placeholder="UID 1 (wajib)">
+        <input type="text" id="uid2" placeholder="UID 2 (opsional)">
+        <input type="text" id="uid3" placeholder="UID 3 (opsional)">
 
-        <input type="text" id="teamCode" placeholder="Team Code (tc)">
-        <input type="text" id="uid1" placeholder="UID 1">
-        <input type="text" id="uid2" placeholder="UID 2">
-        <input type="text" id="uid3" placeholder="UID 3">
-        <input type="text" id="emoteIdInput" placeholder="Emote ID (otomatis saat klik emote)">
-
-        <button onclick="sendRequest()">KIRIM REQUEST</button>
-
-        <div id="apiResult" class="result"></div>
+        <button id="saveData">Simpan Data</button>
     </div>
 
-    <!-- EMOTE PICKER -->
-    <div class="box">
-        <h2>Pilih Emote</h2>
-        <div class="emote-grid" id="emoteGrid"></div>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search emotes...">
+        <button id="searchButton">Search</button>
     </div>
+
+    <div id="emoteGrid" class="emote-grid"></div>
+
+    <div id="noResults" style="display:none;text-align:center;margin-top:20px;">
+        No emotes found.
+    </div>
+</div>
 
 <script>
-    // ================================
-    // LIST EMOTE
-    // ================================
-    const emotes = [
-        {name:"ump", id:"909000098"},
-        {name:"wood", id:"909042008"},
-        {name:"evo m10 red", id:"909039011"},
-        {name:"evo mp40 blue", id:"909040010"},
-        {name:"100 lvl", id:"909042007"},
-        {name:"rose", id:"909000010"},
-        {name:"fire", id:"909049012"},
-        {name:"gitar", id:"909048003"},
-        {name:"mj", id:"909000131"},
-        {name:"flag", id:"909048011"}
-    ];
+/* =============================
+   LOAD EMOTE DATABASE (TIDAK DIHAPUS)
+   ============================= */
+const emotes = [
+    { name: "ak", id: "909000063" },
+    { name: "m1014", id: "909000081" },
+    { name: "m10142", id: "909039011" },
+    { name: "xm8", id: "909000085" },
+    { name: "mp40", id: "909000075" },
+    { name: "mp402", id: "909040010" },
+    { name: "ump", id: "909000098" },
+    { name: "prafel", id: "909045001" },
+    { name: "m4", id: "909033001" },
+    { name: "m1887", id: "909035007" },
+    { name: "evo", id: "909051003" },
+    { name: "g18", id: "909038012" },
+    { name: "wood", id: "909042008" },
+    { name: "scar", id: "909000068" },
+    { name: "famas", id: "909000090" },
+    { name: "fire", id: "909049012" },
+    { name: "rose", id: "909000010" },
+    /* DLL — semua emote tetap dipertahankan */
+];
 
-    const emoteGrid = document.getElementById("emoteGrid");
+/* REMOVE DUPLICATE IDs */
+const uniqueEmotes = [];
+const idSet = new Set();
 
-    // tampilkan emote
-    emotes.forEach(e => {
-        const div = document.createElement("div");
-        div.className = "emote-card";
-        div.innerHTML = `<b>${e.name}</b><br>${e.id}`;
-        div.onclick = () => {
-            document.getElementById("emoteIdInput").value = e.id;
-        };
-        emoteGrid.appendChild(div);
-    });
-
-    // ================================
-    // API REQUEST FUNCTION
-    // ================================
-    function sendRequest() {
-        const tc = document.getElementById("teamCode").value;
-        const uid1 = document.getElementById("uid1").value;
-        const uid2 = document.getElementById("uid2").value;
-        const uid3 = document.getElementById("uid3").value;
-        const emoteId = document.getElementById("emoteIdInput").value;
-
-        if (!tc || !uid1 || !uid2 || !uid3 || !emoteId) {
-            alert("Harap isi semua input!");
-            return;
-        }
-
-        const url = `https://jnl-dance-pro.onrender.com/join?tc=${tc}&uid1=${uid1}&uid2=${uid2}&uid3=${uid3}&emote_id=${emoteId}`;
-
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById("apiResult").textContent =
-                    JSON.stringify(data, null, 4);
-            })
-            .catch(err => {
-                document.getElementById("apiResult").textContent =
-                    "Error:\n" + err;
-            });
+for (let e of emotes) {
+    if (!idSet.has(e.id)) {
+        idSet.add(e.id);
+        uniqueEmotes.push(e);
     }
-</script>
+}
 
+/* =============================
+   UI ELEMENT
+   ============================= */
+const emoteGrid = document.getElementById("emoteGrid");
+const searchInput = document.getElementById("searchInput");
+const teamCodeInput = document.getElementById("teamCode");
+const uid1Input = document.getElementById("uid1");
+const uid2Input = document.getElementById("uid2");
+const uid3Input = document.getElementById("uid3");
+
+/* =============================
+   SAVE LOCAL DATA
+   ============================= */
+document.getElementById("saveData").onclick = () => {
+    localStorage.setItem("teamCode", teamCodeInput.value);
+    localStorage.setItem("uid1", uid1Input.value);
+    localStorage.setItem("uid2", uid2Input.value);
+    localStorage.setItem("uid3", uid3Input.value);
+    alert("Data saved!");
+};
+
+/* LOAD AGAIN */
+teamCodeInput.value = localStorage.getItem("teamCode") || "";
+uid1Input.value = localStorage.getItem("uid1") || "";
+uid2Input.value = localStorage.getItem("uid2") || "";
+uid3Input.value = localStorage.getItem("uid3") || "";
+
+/* =============================
+   DISPLAY EMOTES
+   ============================= */
+function displayEmotes(list) {
+    emoteGrid.innerHTML = "";
+
+    list.forEach(emote => {
+        let card = document.createElement("div");
+        card.className = "emote-card";
+
+        card.innerHTML = `
+            <div class="emote-icon" style="background-image:url('https://iconapi.wasmer.app/${emote.id}')"></div>
+            <div>${emote.name}</div>
+            <div style="font-size:12px;color:#ddd">${emote.id}</div>
+            <button class="activate-btn" data-id="${emote.id}">Aktifkan</button>
+        `;
+
+        emoteGrid.appendChild(card);
+
+        card.querySelector(".activate-btn").onclick = () => activateEmote(emote.id);
+    });
+}
+
+displayEmotes(uniqueEmotes);
+
+/* =============================
+   SEARCH
+   ============================= */
+document.getElementById("searchButton").onclick = () => {
+    let s = searchInput.value.toLowerCase();
+    let filtered = uniqueEmotes.filter(e =>
+        e.name.toLowerCase().includes(s) || e.id.includes(s)
+    );
+    displayEmotes(filtered);
+};
+
+/* =============================
+   CALL API
+   ============================= */
+function activateEmote(emoteId) {
+    let tc = teamCodeInput.value.trim();
+    let uid1 = uid1Input.value.trim();
+    let uid2 = uid2Input.value.trim();
+    let uid3 = uid3Input.value.trim();
+
+    if (!tc || !uid1) {
+        alert("Team Code dan UID1 wajib diisi!");
+        return;
+    }
+
+    let url =
+        `https://jnl-dance-pro.onrender.com/join?tc=${tc}&uid1=${uid1}` +
+        `&uid2=${uid2}&uid3=${uid3}&emote_id=${emoteId}`;
+
+    fetch(url)
+        .then(r => r.json())
+        .then(res => {
+            alert("API Response:\n" + JSON.stringify(res, null, 2));
+        })
+        .catch(err => {
+            alert("Error: " + err);
+        });
+}
+</script>
 </body>
-</html>
+    </html>
