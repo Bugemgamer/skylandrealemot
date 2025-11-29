@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emote + API Team Join</title>
+    <style>
+        body {
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .box {
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            margin: 5px 0;
+            width: 100%;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .result {
+            white-space: pre-wrap;
+            background: #000;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .emote-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .emote-card {
+            background: #333;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .emote-card:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>TEAM JOIN API + EMOTE PICKER</h1>
+
+    <!-- API FORM -->
+    <div class="box">
+        <h2>API Team Join Generator</h2>
+
+        <input type="text" id="teamCode" placeholder="Team Code (tc)">
+        <input type="text" id="uid1" placeholder="UID 1">
+        <input type="text" id="uid2" placeholder="UID 2">
+        <input type="text" id="uid3" placeholder="UID 3">
+        <input type="text" id="emoteIdInput" placeholder="Emote ID (otomatis saat klik emote)">
+
+        <button onclick="sendRequest()">KIRIM REQUEST</button>
+
+        <div id="apiResult" class="result"></div>
+    </div>
+
+    <!-- EMOTE PICKER -->
+    <div class="box">
+        <h2>Pilih Emote</h2>
+        <div class="emote-grid" id="emoteGrid"></div>
+    </div>
+
+<script>
+    // ================================
+    // LIST EMOTE
+    // ================================
+    const emotes = [
+        {name:"ump", id:"909000098"},
+        {name:"wood", id:"909042008"},
+        {name:"evo m10 red", id:"909039011"},
+        {name:"evo mp40 blue", id:"909040010"},
+        {name:"100 lvl", id:"909042007"},
+        {name:"rose", id:"909000010"},
+        {name:"fire", id:"909049012"},
+        {name:"gitar", id:"909048003"},
+        {name:"mj", id:"909000131"},
+        {name:"flag", id:"909048011"}
+    ];
+
+    const emoteGrid = document.getElementById("emoteGrid");
+
+    // tampilkan emote
+    emotes.forEach(e => {
+        const div = document.createElement("div");
+        div.className = "emote-card";
+        div.innerHTML = `<b>${e.name}</b><br>${e.id}`;
+        div.onclick = () => {
+            document.getElementById("emoteIdInput").value = e.id;
+        };
+        emoteGrid.appendChild(div);
+    });
+
+    // ================================
+    // API REQUEST FUNCTION
+    // ================================
+    function sendRequest() {
+        const tc = document.getElementById("teamCode").value;
+        const uid1 = document.getElementById("uid1").value;
+        const uid2 = document.getElementById("uid2").value;
+        const uid3 = document.getElementById("uid3").value;
+        const emoteId = document.getElementById("emoteIdInput").value;
+
+        if (!tc || !uid1 || !uid2 || !uid3 || !emoteId) {
+            alert("Harap isi semua input!");
+            return;
+        }
+
+        const url = `https://jnl-dance-pro.onrender.com/join?tc=${tc}&uid1=${uid1}&uid2=${uid2}&uid3=${uid3}&emote_id=${emoteId}`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("apiResult").textContent =
+                    JSON.stringify(data, null, 4);
+            })
+            .catch(err => {
+                document.getElementById("apiResult").textContent =
+                    "Error:\n" + err;
+            });
+    }
+</script>
+
+</body>
+</html>
